@@ -31,8 +31,7 @@ const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial
 // Soru Cevaplama Süre Limiti (Saniye)
 const TIME_LIMIT = 15; 
 
-// --- YENİ EKLENEN KISIM: 18 SORU VE FOTOĞRAF URL'leri ---
-// NOT: BU URL'LER SADECE ÖRNEKTİR. public/images KLASÖRÜNDEKİ DOSYA İSİMLERİ İLE EŞLEŞMELİDİR.
+// --- 18 SORU VE FOTOĞRAF URL'leri ---
 const QUESTIONS = [
   { id: 1, questionText: "Türkiye'nin başkenti neresidir?", options: ["İstanbul", "Ankara", "İzmir", "Bursa"], correctAnswerIndex: 1, imageUrl: "/images/soru1-ankara.jpg", points: 1000 },
   { id: 2, questionText: "Dünyanın en yüksek dağı nedir?", options: ["K2", "Kangchenjunga", "Everest", "Lhotse"], correctAnswerIndex: 2, imageUrl: "/images/soru2-everest.jpg", points: 1000 },
@@ -53,7 +52,6 @@ const QUESTIONS = [
   { id: 17, questionText: "Hangi renkler birleşince yeşil oluşur?", options: ["Mavi ve Kırmızı", "Sarı ve Mavi", "Kırmızı ve Sarı", "Mavi ve Beyaz"], correctAnswerIndex: 1, imageUrl: "/images/soru17-colors.jpg", points: 1000 },
   { id: 18, questionText: "Ramoot'un yapımcısı kimdir? (İpucu: Sizsiniz!)", options: ["Mark Zuckerberg", "İlkay (Siz)", "Elon Musk", "Gemini"], correctAnswerIndex: 1, imageUrl: "/images/soru18-maker.jpg", points: 1000 },
 ];
-// NOT: Eğer 13 soruya düşürmek isterseniz, yukarıdaki listeden son 5 soruyu silmeniz yeterlidir.
 
 // Oyunun ana bileşeni
 const App = () => {
@@ -70,10 +68,10 @@ const App = () => {
 
   // Constants
   const GAME_COLLECTION_NAME = 'ramoot_games';
-  // Firestore koleksiyon yolu: /artifacts/{appId}/public/data/ramoot_games
+  // Firestore koleksiyon yolu
   const GAME_COLLECTION_PATH = `/artifacts/${appId}/public/data/${GAME_COLLECTION_NAME}`;
   
-  // Quiz creation state (Artık kullanılmayacak ama bileşeni kaldırmamak için boş bırakıldı)
+  // Quiz creation state
   const [quizQuestions, setQuizQuestions] = useState([]);
 
 
@@ -82,11 +80,9 @@ const App = () => {
     const initFirebase = async () => {
         try {
             if (!Object.keys(firebaseConfig).length) {
-                // Konfigürasyonun varlığını kontrol et
                 throw new Error("Firebase config is missing."); 
            }
             
-            // Kullanıcının sağladığı konfigürasyon ile Firebase'i başlat
             const app = initializeApp(firebaseConfig); 
             const firestore = getFirestore(app);
             const firebaseAuth = getAuth(app);
@@ -94,29 +90,23 @@ const App = () => {
             setDb(firestore);
             setAuth(firebaseAuth);
 
-            // Kimlik doğrulama dinleyicisi: Oturum açma durumunu yönetir.
             const unsubscribe = onAuthStateChanged(firebaseAuth, async (user) => {
                 if (!user) {
-                    // Kullanıcı oturum açmamışsa oturum açmayı dene (Custom Token > Anonim)
                     try {
                         if (initialAuthToken) {
-                            console.log("Attempting sign in with custom token...");
                             await signInWithCustomToken(firebaseAuth, initialAuthToken);
                         } else {
-                            console.log("Attempting anonymous sign in...");
                             await signInAnonymously(firebaseAuth);
                         }
                     } catch (e) {
-                        console.error("Auth Error (Check Rules/Token Validity):", e);
-                        setError("Kimlik doğrulama hatası oluştu. (Firebase ayarlarınızı veya kurallarınızı kontrol edin)");
+                        console.error("Auth Error:", e);
+                        setError("Kimlik doğrulama hatası oluştu. (Firebase ayarlarınızı kontrol edin)");
                     }
                 }
                 
-                // Kimlik doğrulama tamamlandıktan sonra userId'yi ayarla
                 const currentUserId = firebaseAuth.currentUser?.uid || crypto.randomUUID();
                 setUserId(currentUserId);
                 setIsAuthReady(true);
-                console.log("Firebase initialized and Auth Ready. User ID:", currentUserId);
             });
 
             return () => unsubscribe();
@@ -131,14 +121,10 @@ const App = () => {
   
   // 2. Real-time Game State Listener (onSnapshot)
   useEffect(() => {
-    // Auth hazır değilse, db yoksa veya gameId boşsa dinlemeyi başlatma
     if (!isAuthReady || !db || !gameId) return;
 
-    // Koleksiyon yolunu kullan
     const gameDocRef = doc(db, GAME_COLLECTION_PATH, gameId.toUpperCase());
     
-    console.log(`Listening to Game ID: ${gameId.toUpperCase()} at path: ${GAME_COLLECTION_PATH}/${gameId.toUpperCase()}`);
-
     const unsubscribe = onSnapshot(gameDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const liveGameData = docSnap.data();
@@ -161,7 +147,7 @@ const App = () => {
       setLoading(false);
     }, (e) => {
       console.error("Firestore Snapshot Error:", e);
-      setError("Oyun verileri çekilirken bir hata oluştu. Firestore kurallarını veya API durumunu kontrol edin.");
+      setError("Oyun verileri çekilirken bir hata oluştu.");
       setLoading(false);
     });
 
@@ -178,16 +164,15 @@ const App = () => {
   
   // --- ADMIN/HOST Functions ---
 
-  // ADMIN: Yeni bir oyun oluşturur (Şimdi hardcoded soruları kullanıyor)
+  // ADMIN: Yeni bir oyun oluşturur (Hardcoded soruları kullanır)
   const createGame = async (adminName) => {
     if (!isAuthReady || !db || !userId) {
       setError("Sistem hazır değil. Lütfen bekleyin.");
       return;
     }
     
-    // Artık quizQuestions kullanılmıyor, hardcoded QUESTIONS dizisi kullanılıyor
     if (QUESTIONS.length === 0) {
-      setError("Soru bankası boş. Lütfen en az bir soru ekleyin.");
+      setError("Soru bankası boş.");
       return;
     }
 
@@ -196,14 +181,12 @@ const App = () => {
     const newGameId = Math.random().toString(36).substring(2, 8).toUpperCase();
     const newGameRef = getGameRef(newGameId);
     
-    // Soruları hazırlarken answered, startTime ve imageUrl alanlarını ekle
     const initialQuestions = QUESTIONS.map(q => ({
         ...q,
         answered: false, 
         startTime: null
     }));
 
-    // Oyuncuyu (Admin) otomatik olarak ekle
     const adminPlayer = {
         name: adminName,
         score: 0,
@@ -216,19 +199,19 @@ const App = () => {
         gameId: newGameId,
         status: 'lobby', // Durum: Lobi (Oyuncu Bekliyor)
         adminId: userId,
-        currentQuestionIndex: -1, // İlk soruya geçmek için 0'dan başlatılacak
-        questions: initialQuestions, // HARDCODED QUESTIONS KULLANILDI
+        currentQuestionIndex: -1, 
+        questions: initialQuestions, 
         players: { [userId]: adminPlayer }, // Admin oyuncu olarak eklendi
         answersReceived: {}, 
         playerAnswers: {}, 
         createdAt: new Date().toISOString(),
       });
       setGameId(newGameId);
+      setUserName(adminName);
       setMode('admin');
-      console.log(`Game created successfully with ID: ${newGameId}`);
     } catch (e) {
       console.error("Create Game Error:", e);
-      setError("Oyun oluşturulurken bir hata oluştu. (Yol hatası veya Firestore kurallarını kontrol edin)");
+      setError("Oyun oluşturulurken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -241,7 +224,6 @@ const App = () => {
     const newIndex = game.currentQuestionIndex + 1;
     const gameRef = getGameRef(gameId);
     
-    // Geçerli soruyu cevaplandı olarak işaretle (Görseli tetiklemek için)
     const currentQ = game.questions[game.currentQuestionIndex];
     if (currentQ && !currentQ.answered) {
         await updateDoc(gameRef, {
@@ -249,8 +231,8 @@ const App = () => {
         });
     }
 
-    // 15 saniye bekleme süresi eklendi
-    await new Promise(resolve => setTimeout(resolve, 3000)); // 3 saniye bekleme
+    // Cevapları göstermek için bekleme süresi
+    await new Promise(resolve => setTimeout(resolve, 3000)); 
 
     try {
       if (newIndex < game.questions.length) {
@@ -260,10 +242,10 @@ const App = () => {
           currentQuestionIndex: newIndex,
           answersReceived: {},
           playerAnswers: {},
-          [`questions.${newIndex}.startTime`]: Date.now(), // Yeni soruya başlama zamanı
+          [`questions.${newIndex}.startTime`]: Date.now(), 
         });
       } else {
-        // End the game (Go to final scoreboard)
+        // End the game
         await updateDoc(gameRef, {
           status: 'score', 
           currentQuestionIndex: newIndex,
@@ -277,7 +259,7 @@ const App = () => {
     }
   };
   
-  // ADMIN: Lobiden oyunu başlatır (currentQuestionIndex = 0)
+  // ADMIN: Lobiden oyunu başlatır
   const startGameFromLobby = async () => {
     if (!game || game.adminId !== userId || game.status !== 'lobby') return;
     setLoading(true);
@@ -302,8 +284,9 @@ const App = () => {
 
   // PLAYER: Var olan oyuna katılır
   const joinGame = async (code, name) => {
-    if (!isAuthReady || !db || !userId || !code || !name) {
-      setError("Sistem hatası: Lütfen kodu ve kullanıcı adını girin.");
+    // İsim kontrolü burada da tekrar ediyoruz.
+    if (!isAuthReady || !db || !userId || !code || !name || name.length < 3) {
+      setError("Sistem hatası: Lütfen kodu ve en az 3 karakterli kullanıcı adını girin.");
       return;
     }
     setLoading(true);
@@ -346,7 +329,7 @@ const App = () => {
       });
 
       setGameId(uppercaseGameId);
-      setUserName(name); // State'i güncelle
+      setUserName(name); 
       setMode('player');
     } catch (e) {
       console.error("Join Game Error:", e);
@@ -362,38 +345,31 @@ const App = () => {
     const gameRef = getGameRef(gameId);
     const question = game.questions[game.currentQuestionIndex];
     
-    // Süre kontrolü
-    const timeElapsed = (Date.now() - question.startTime) / 1000;
-    if (timeElapsed > TIME_LIMIT) return; // Süre bittiyse cevap kabul etme
+    const timeElapsed = question.startTime ? (Date.now() - question.startTime) / 1000 : 0;
+    if (timeElapsed > TIME_LIMIT) return; 
 
     const isCorrect = answerIndex === question.correctAnswerIndex;
-    const timestamp = Date.now();
     
-    // Puan hesaplama: Hızlı ve doğru cevaplar daha çok puan getirir.
+    // Puan hesaplama
     const basePoints = 1000;
     const timePenaltyFactor = 50; 
     let scoreEarned = 0;
 
     if (isCorrect) {
-        // Puan hesaplama: Başlangıç Puanı - (Geçen Süre * Puan Kaybı Katsayısı)
         const timePenalty = timeElapsed * timePenaltyFactor;
         scoreEarned = Math.max(100, basePoints - timePenalty);
         
-        // Seri bonusu ekle (Maksimum 500)
         const currentStreak = game.players[userId].streak || 0;
         const streakBonus = Math.min(currentStreak * 100, 500);
         scoreEarned += streakBonus;
         scoreEarned = Math.round(scoreEarned);
     }
     
-    // 2. Oyuncu istatistiklerini ve oyun durumunu güncelle
+    // Oyuncu istatistiklerini ve oyun durumunu güncelle
     try {
         await updateDoc(gameRef, {
-            // Oyuncuyu cevapladı olarak işaretle
             [`answersReceived.${userId}`]: true,
-            // Cevabı ve zamanı kaydet
-            [`playerAnswers.${userId}`]: { answerIndex, timestamp, scoreEarned, timeElapsed, isCorrect },
-            // Oyuncunun puanını ve serisini güncelle
+            [`playerAnswers.${userId}`]: { answerIndex, scoreEarned, timeElapsed, isCorrect },
             [`players.${userId}.score`]: (game.players[userId].score || 0) + scoreEarned,
             [`players.${userId}.streak`]: isCorrect ? (game.players[userId].streak || 0) + 1 : 0,
         });
@@ -406,7 +382,6 @@ const App = () => {
 
   // --- Calculated Data ---
 
-  // Mevcut soruyu getir
   const currentQuestion = useMemo(() => {
     if (!game || game.currentQuestionIndex < 0 || game.currentQuestionIndex >= game.questions.length) {
       return null;
@@ -414,7 +389,6 @@ const App = () => {
     return game.questions[game.currentQuestionIndex];
   }, [game]);
   
-  // Skor tablosu için oyuncu listesini puana göre sırala
   const sortedPlayers = useMemo(() => {
     if (!game || !game.players) return [];
     return Object.values(game.players)
@@ -426,19 +400,16 @@ const App = () => {
       }));
   }, [game, userName]);
   
-  // Mevcut oyuncunun istatistikleri
   const currentPlayer = useMemo(() => {
       if (!game || !userId) return null;
       return game.players[userId];
   }, [game, userId]);
   
-  // Cevaplayan oyuncu sayısı
   const answeredCount = useMemo(() => {
       if (!game || !game.answersReceived) return 0;
       return Object.keys(game.answersReceived).length;
   }, [game]);
   
-  // Mevcut kullanıcının admin olup olmadığı
   const isAdmin = useMemo(() => game && userId === game.adminId, [game, userId]);
   
   // --- UI Components ---
@@ -473,12 +444,10 @@ const App = () => {
     </div>
   );
   
-  // Quiz Oluşturma Ekranı (Admin artık bu ekranı atlıyor)
-  // Bu bileşen, kod akışını bozmamak adına olduğu gibi kalabilir, ancak artık ulaşılmayacak.
   const QuizCreation = () => (
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-4xl text-center">
-          <h2 className="text-3xl font-extrabold text-red-700 mb-6 border-b pb-2">HATA: SORU DÜZENLEYİCİ</h2>
-          <p className="text-gray-600">Bu ekran, otomatik oyun oluşturulduğu için admin tarafından atlanmıştır.</p>
+          <h2 className="text-3xl font-extrabold text-red-700 mb-6 border-b pb-2">SORU DÜZENLEYİCİ ATLANDI</h2>
+          <p className="text-gray-600">Oyun, önceden tanımlı sorularla otomatik olarak oluşturulacaktır.</p>
           <Button onClick={() => setMode('welcome')} className="mt-4">Ana Sayfaya Dön</Button>
       </div>
   );
@@ -505,10 +474,12 @@ const App = () => {
                   />
                   <button
                     onClick={() => {
-                        // execCommand kopyalama işlemi (iframe'lerde daha güvenilir)
-                        navigator.clipboard.writeText(gameLink); 
-                        setError('Bağlantı panoya kopyalandı!');
-                        setTimeout(() => setError(''), 3000);
+                        navigator.clipboard.writeText(gameLink).then(() => {
+                            setError('Bağlantı panoya kopyalandı!');
+                            setTimeout(() => setError(''), 3000);
+                        }).catch(err => {
+                             setError('Kopyalama başarısız oldu.');
+                        });
                     }}
                     className="mt-2 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
                   >
@@ -547,16 +518,13 @@ const App = () => {
     if (!game || !currentQuestion) return <div className="text-center text-xl text-red-500">Hata: Soru yüklenemedi.</div>;
     const totalPlayers = Object.keys(game.players).length;
     
-    // Cevapların süresi doldu mu?
     const elapsed = currentQuestion.startTime ? Math.floor((Date.now() - currentQuestion.startTime) / 1000) : 0;
     const isTimeUp = elapsed >= TIME_LIMIT;
     
-    const isQuestionFinished = answeredCount === totalPlayers || isTimeUp;
+    const isQuestionFinished = currentQuestion.answered || answeredCount === totalPlayers || isTimeUp;
     
-    // Cevap özetini hesapla
     const answerSummary = currentQuestion.options.map((option, index) => {
         const correct = index === currentQuestion.correctAnswerIndex;
-        // Bu cevabı veren oyuncu sayısı
         const totalAnswers = Object.values(game.playerAnswers).filter(a => a.answerIndex === index).length; 
         const percentage = totalPlayers > 0 ? Math.round((totalAnswers / totalPlayers) * 100) : 0;
         
@@ -565,7 +533,6 @@ const App = () => {
     
     const colors = ['bg-red-500', 'bg-blue-500', 'bg-yellow-500', 'bg-green-500'];
     
-    // YENİ: Soruya ait fotoğrafı gösterme alanı
     const ImageDisplay = () => {
         if (!currentQuestion || !currentQuestion.answered || !currentQuestion.imageUrl) return null;
         
@@ -593,7 +560,7 @@ const App = () => {
         </div>
 
         <div className="bg-gray-100 p-8 rounded-xl mb-8">
-            <p className="text-3xl font-semibold text-gray-800 text-center">{currentQuestion.text}</p>
+            <p className="text-3xl font-semibold text-gray-800 text-center">{currentQuestion.questionText}</p>
         </div>
 
         {/* Geri Sayım Çubuğu */}
@@ -639,7 +606,6 @@ const App = () => {
   const PlayerGameScreen = () => {
     if (!game || !currentQuestion || !currentPlayer) return <div className="text-center text-xl text-red-500">Hata: Oyun verisi eksik.</div>;
     
-    // Geri Sayım Kontrolü
     const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
     const hasAnswered = game.answersReceived[userId];
     const playerAnswerInfo = game.playerAnswers[userId];
@@ -684,7 +650,7 @@ const App = () => {
         </h2>
         
         <div className="bg-gray-100 p-6 rounded-xl mb-6">
-          <p className="text-xl font-semibold text-gray-800">{currentQuestion.text}</p>
+          <p className="text-xl font-semibold text-gray-800">{currentQuestion.questionText}</p>
         </div>
 
         {/* Geri Sayım */}
@@ -787,12 +753,13 @@ const App = () => {
     );
   };
 
-  // YENİ Karşılama Ekranı (Basitleştirilmiş ve Yönetici Odaklı)
+  // YENİ Karşılama Ekranı (Basitleştirilmiş ve Minimum 3 Karakter Kontrollü)
   const WelcomeScreen = () => {
       
     const handleEntry = async () => {
+        // İsim kontrolü: En az 3 karakter olmalı
         if (!userName || userName.length < 3) {
-            setError("Lütfen geçerli bir rumuz girin.");
+            setError("Lütfen en az 3 karakterli geçerli bir rumuz girin.");
             return;
         }
 
@@ -809,6 +776,9 @@ const App = () => {
         }
     };
 
+    const isJoining = new URLSearchParams(window.location.search).get('gameId');
+    const isButtonDisabled = !userName || userName.length < 3;
+
     return (
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border-b-8 border-indigo-700">
         <h1 className="text-4xl font-black text-indigo-700 mb-2">Ramoot</h1>
@@ -818,16 +788,17 @@ const App = () => {
           label="Adın nedir?"
           value={userName}
           onChange={(e) => setUserName(e.target.value)}
-          placeholder="Rumuzunuz"
+          placeholder="Rumuzunuz (Örn: Sadrazamın Keyfi)"
         />
         
         <div className="space-y-4 mt-6">
-          <Button onClick={handleEntry} className="w-full" disabled={!userName}>
-            {new URLSearchParams(window.location.search).get('gameId') ? 'Oyuna Katıl' : 'Oyunu Başlat (Admin)'}
+          <Button onClick={handleEntry} className="w-full" disabled={isButtonDisabled}>
+            {/* Buton metni dinamik: URL'de gameId varsa Katıl, yoksa Başlat */}
+            {isJoining ? 'Oyuna Katıl' : 'Oyunu Başlat (Admin)'}
           </Button>
         </div>
         
-        <p className="mt-6 text-xs text-gray-400">Kullanıcı ID: {userId}</p>
+        {/* Kullanıcının kafasını karıştıran userId'yi buradan kaldırdık */}
       </div>
     );
   };
@@ -845,7 +816,6 @@ const App = () => {
   
   // Hata Gösterimi
   if (error) {
-    // Hata mesajını belirgin şekilde göster
     return (
         <div className="min-h-screen bg-indigo-800 flex flex-col items-center justify-center p-4">
             <div className="bg-red-50 border-l-4 border-red-400 p-6 rounded-lg shadow-xl max-w-xl mx-auto mb-8">
@@ -861,20 +831,17 @@ const App = () => {
             }} color="bg-gray-500 hover:bg-gray-600">
                 Ana Sayfaya Dön
             </Button>
-            <p className="mt-6 text-xs text-gray-400">Kullanıcı ID: {userId}</p>
+            {/* Hatanın neyle ilgili olduğunu görmek isteyenler için, alt tarafa userId'yi bıraktık. */}
+            <p className="mt-6 text-xs text-gray-400">Hata Kodu/Kullanıcı ID: {userId}</p>
         </div>
     );
   }
 
-  // Hata yoksa, hangi ekranı göstereceğine karar ver
   let Content;
   
-  // QuizCreation ekranı artık Admin tarafından atlanıyor, bu yüzden bu koşul sadece
-  // admin yanlışlıkla setMode('create-questions') yapmışsa tetiklenir.
   if (mode === 'create-questions') {
     Content = <QuizCreation />; 
   } else if (gameId && game) {
-    // Oyun var, durumu kontrol et
     const isLobby = game.status === 'lobby';
     const isInGame = game.status === 'in-game';
     const isScore = game.status === 'score';
@@ -887,14 +854,12 @@ const App = () => {
       } else if (currentPlayer) {
         Content = <PlayerGameScreen />;
       } else {
-        // Oyuncu oyuna katılamamışsa veya oyun başlamışsa
         Content = <div className="text-center text-xl text-white font-bold p-8 bg-red-600 rounded-xl shadow-2xl">Oyun başladı, katılamazsınız.</div>;
       }
     } else if (isScore) {
       Content = <Scoreboard />;
     }
   } else {
-    // Varsayılan karşılama ekranı
     Content = <WelcomeScreen />;
   }
 
