@@ -10,47 +10,43 @@ import {
 
 // --- Firebase ve Global Durum Yönetimi ---
 
-// KULLANICININ İSTEĞİ ÜZERİNE, SAĞLANAN HARDBOARDED FIREBASE AYARLARI KULLANILIYOR.
-// Not: Platformun otomatik kimlik doğrulama token'ı (__initial_auth_token) çalışması için korunmuştur.
+// HARDCODED FIREBASE AYARLARI KULLANILIYOR.
 const HARDCODED_FIREBASE_CONFIG = {
     apiKey: "AIzaSyCWomiP6AUe13iKexXZAPibxvi67zrY11A",
     authDomain: "ramoot-game.firebaseapp.com",
-    projectId: "ramoot-game", // Bu değer, Firestore yolunda appId olarak kullanılacaktır.
+    projectId: "ramoot-game", 
     storageBucket: "ramoot-game.firebasestorage.app",
     messagingSenderId: "403149392724",
     appId: "1:403149392724:web:36fbcff884eec5bac6d6c1"
 };
 
-// Yapılandırmayı doğrudan kullan
 const firebaseConfig = HARDCODED_FIREBASE_CONFIG;
-// Firestore yolu için projectId'yi appId olarak kullan
 const appId = HARDCODED_FIREBASE_CONFIG.projectId;
-// Platformun kritik kimlik doğrulama token'ını koru
 const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
-// Soru Cevaplama Süre Limiti (Saniye)
 const TIME_LIMIT = 15; 
 
 // --- 18 SORU VE FOTOĞRAF URL'leri ---
+// NOT: Görsellerin public/images klasöründe olduğundan emin olun.
 const QUESTIONS = [
-  { id: 1, questionText: "Türkiye'nin başkenti neresidir?", options: ["İstanbul", "Ankara", "İzmir", "Bursa"], correctAnswerIndex: 1, imageUrl: "/images/soru1-ankara.jpg", points: 1000 },
-  { id: 2, questionText: "Dünyanın en yüksek dağı nedir?", options: ["K2", "Kangchenjunga", "Everest", "Lhotse"], correctAnswerIndex: 2, imageUrl: "/images/soru2-everest.jpg", points: 1000 },
-  { id: 3, questionText: "React hangi şirket tarafından geliştirilmiştir?", options: ["Google", "Microsoft", "Facebook (Meta)", "Apple"], correctAnswerIndex: 2, imageUrl: "/images/soru3-react.jpg", points: 1000 },
-  { id: 4, questionText: "Işık yılı neyin birimidir?", options: ["Zaman", "Hız", "Mesafe", "Kütle"], correctAnswerIndex: 2, imageUrl: "/images/soru4-space.jpg", points: 1000 },
-  { id: 5, questionText: "Hangi element periyodik tablonun 'Au' sembolüdür?", options: ["Gümüş", "Altın", "Alüminyum", "Cıva"], correctAnswerIndex: 1, imageUrl: "/images/soru5-gold.jpg", points: 1000 },
-  { id: 6, questionText: "Vercel üzerinde hangi tür uygulamalar yayınlanır?", options: ["Veritabanları", "Frontend/Fullstack Uygulamalar", "Mobil Uygulamalar", "Donanım Sürücüleri"], correctAnswerIndex: 1, imageUrl: "/images/soru6-vercel.jpg", points: 1000 },
-  { id: 7, questionText: "1923 yılında kurulan cumhuriyet hangi ülkededir?", options: ["ABD", "Fransa", "Türkiye", "Rusya"], correctAnswerIndex: 2, imageUrl: "/images/soru7-turkey.jpg", points: 1000 },
-  { id: 8, questionText: "Bir byte kaç bittir?", options: ["4", "8", "16", "32"], correctAnswerIndex: 1, imageUrl: "/images/soru8-byte.jpg", points: 1000 },
-  { id: 9, questionText: "Leonardo da Vinci'nin en ünlü tablosu nedir?", options: ["Son Akşam Yemeği", "Yıldızlı Gece", "Mona Lisa", "Çığlık"], correctAnswerIndex: 2, imageUrl: "/images/soru9-monalisa.jpg", points: 1000 },
-  { id: 10, questionText: "En büyük okyanus hangisidir?", options: ["Atlantik", "Hint", "Arktik", "Pasifik"], correctAnswerIndex: 3, imageUrl: "/images/soru10-ocean.jpg", points: 1000 },
-  { id: 11, questionText: "Hangi gezegen Güneş Sistemi'nin en büyüğüdür?", options: ["Dünya", "Mars", "Jüpiter", "Satürn"], correctAnswerIndex: 2, imageUrl: "/images/soru11-jupiter.jpg", points: 1000 },
-  { id: 12, questionText: "Bir metrekare kaç santimetrekaredir?", options: ["100", "1.000", "10.000", "100.000"], correctAnswerIndex: 2, imageUrl: "/images/soru12-area.jpg", points: 1000 },
-  { id: 13, questionText: "İnsan vücudundaki en büyük organ nedir?", options: ["Kalp", "Beyin", "Akciğer", "Deri"], correctAnswerIndex: 3, imageUrl: "/images/soru13-skin.jpg", points: 1000 },
-  { id: 14, questionText: "Hangi film serisi Yüzüklerin Efendisi'nin öncülüdür?", options: ["Narnia", "Hobbit", "Harry Potter", "Game of Thrones"], correctAnswerIndex: 1, imageUrl: "/images/soru14-hobbit.jpg", points: 1000 },
-  { id: 15, questionText: "Bir üçgenin iç açıları toplamı kaç derecedir?", options: ["90", "180", "270", "360"], correctAnswerIndex: 1, imageUrl: "/images/soru15-triangle.jpg", points: 1000 },
-  { id: 16, questionText: "Firebase ne tür bir hizmettir?", options: ["İşletim Sistemi", "Mobil Geliştirme Platformu", "Veri Analiz Aracı", "Oyun Motoru"], correctAnswerIndex: 1, imageUrl: "/images/soru16-firebase.jpg", points: 1000 },
-  { id: 17, questionText: "Hangi renkler birleşince yeşil oluşur?", options: ["Mavi ve Kırmızı", "Sarı ve Mavi", "Kırmızı ve Sarı", "Mavi ve Beyaz"], correctAnswerIndex: 1, imageUrl: "/images/soru17-colors.jpg", points: 1000 },
-  { id: 18, questionText: "Ramoot'un yapımcısı kimdir? (İpucu: Sizsiniz!)", options: ["Mark Zuckerberg", "İlkay (Siz)", "Elon Musk", "Gemini"], correctAnswerIndex: 1, imageUrl: "/images/soru18-maker.jpg", points: 1000 },
+  { id: 1, questionText: "Türkiye'nin başkenti neresidir?", options: ["İstanbul", "Ankara", "İzmir", "Bursa"], correctAnswerIndex: 1, imageUrl: "/images/1.jpg", points: 1000 },
+  { id: 2, questionText: "Dünyanın en yüksek dağı nedir?", options: ["K2", "Kangchenjunga", "Everest", "Lhotse"], correctAnswerIndex: 2, imageUrl: "/images/2.jpg", points: 1000 },
+  { id: 3, questionText: "React hangi şirket tarafından geliştirilmiştir?", options: ["Google", "Microsoft", "Facebook (Meta)", "Apple"], correctAnswerIndex: 2, imageUrl: "/images/3.jpg", points: 1000 },
+  { id: 4, questionText: "Işık yılı neyin birimidir?", options: ["Zaman", "Hız", "Mesafe", "Kütle"], correctAnswerIndex: 2, imageUrl: "/images/3.jpg", points: 1000 },
+  { id: 5, questionText: "Hangi element periyodik tablonun 'Au' sembolüdür?", options: ["Gümüş", "Altın", "Alüminyum", "Cıva"], correctAnswerIndex: 1, imageUrl: "/images/4.jpg", points: 1000 },
+  { id: 6, questionText: "Vercel üzerinde hangi tür uygulamalar yayınlanır?", options: ["Veritabanları", "Frontend/Fullstack Uygulamalar", "Mobil Uygulamalar", "Donanım Sürücüleri"], correctAnswerIndex: 1, imageUrl: "/images/5.jpg", points: 1000 },
+  { id: 7, questionText: "1923 yılında kurulan cumhuriyet hangi ülkededir?", options: ["ABD", "Fransa", "Türkiye", "Rusya"], correctAnswerIndex: 2, imageUrl: "/images/6.jpg", points: 1000 },
+  { id: 8, questionText: "Bir byte kaç bittir?", options: ["4", "8", "16", "32"], correctAnswerIndex: 1, imageUrl: "/images/7.jpg", points: 1000 },
+  { id: 9, questionText: "Leonardo da Vinci'nin en ünlü tablosu nedir?", options: ["Son Akşam Yemeği", "Yıldızlı Gece", "Mona Lisa", "Çığlık"], correctAnswerIndex: 2, imageUrl: "/images/8.jpg", points: 1000 },
+  { id: 10, questionText: "En büyük okyanus hangisidir?", options: ["Atlantik", "Hint", "Arktik", "Pasifik"], correctAnswerIndex: 3, imageUrl: "/images/9.jpg", points: 1000 },
+  { id: 11, questionText: "Hangi gezegen Güneş Sistemi'nin en büyüğüdür?", options: ["Dünya", "Mars", "Jüpiter", "Satürn"], correctAnswerIndex: 2, imageUrl: "/images/10.jpg", points: 1000 },
+  { id: 12, questionText: "Bir metrekare kaç santimetrekaredir?", options: ["100", "1.000", "10.000", "100.000"], correctAnswerIndex: 2, imageUrl: "/images/11.jpg", points: 1000 },
+  { id: 13, questionText: "İnsan vücudundaki en büyük organ nedir?", options: ["Kalp", "Beyin", "Akciğer", "Deri"], correctAnswerIndex: 3, imageUrl: "/images/13.jpg", points: 1000 },
+  { id: 14, questionText: "Hangi film serisi Yüzüklerin Efendisi'nin öncülüdür?", options: ["Narnia", "Hobbit", "Harry Potter", "Game of Thrones"], correctAnswerIndex: 1, imageUrl: "/images/14.jpg", points: 1000 },
+  { id: 15, questionText: "Bir üçgenin iç açıları toplamı kaç derecedir?", options: ["90", "180", "270", "360"], correctAnswerIndex: 1, imageUrl: "/images/15.jpg", points: 1000 },
+  { id: 16, questionText: "Firebase ne tür bir hizmettir?", options: ["İşletim Sistemi", "Mobil Geliştirme Platformu", "Veri Analiz Aracı", "Oyun Motoru"], correctAnswerIndex: 1, imageUrl: "/images/16.jpg", points: 1000 },
+  { id: 17, questionText: "Hangi renkler birleşince yeşil oluşur?", options: ["Mavi ve Kırmızı", "Sarı ve Mavi", "Kırmızı ve Sarı", "Mavi ve Beyaz"], correctAnswerIndex: 1, imageUrl: "/images/17.jpg", points: 1000 },
+  { id: 18, questionText: "Ramoot'un yapımcısı kimdir? (İpucu: Sizsiniz!)", options: ["Mark Zuckerberg", "İlkay (Siz)", "Elon Musk", "Gemini"], correctAnswerIndex: 1, imageUrl: "/images/18.jpg", points: 1000 },
 ];
 
 // Oyunun ana bileşeni
@@ -68,12 +64,8 @@ const App = () => {
 
   // Constants
   const GAME_COLLECTION_NAME = 'ramoot_games';
-  // Firestore koleksiyon yolu
   const GAME_COLLECTION_PATH = `/artifacts/${appId}/public/data/${GAME_COLLECTION_NAME}`;
   
-  // Quiz creation state
-  const [quizQuestions, setQuizQuestions] = useState([]);
-
 
   // 1. Firebase Initialization and Authentication
   useEffect(() => {
@@ -137,11 +129,14 @@ const App = () => {
         }
 
       } else {
+        // KRİTİK DÜZELTME: Admin, oyunu yeni oluşturduktan hemen sonra bu bloğa düşüp welcome'a dönmemeli.
         setGame(null);
-        if (mode !== 'welcome') {
-          setError(`Oyun ID'si (${gameId.toUpperCase()}) bulunamadı veya sona erdi.`);
-          setMode('welcome');
-          setGameId('');
+        
+        // YALNIZCA OYUNCU (player) modundaysak veya oyun admin tarafından silinmişse sıfırla.
+        if (mode === 'player' || (mode === 'admin' && gameId)) {
+             setError(`Oyun ID'si (${gameId.toUpperCase()}) bulunamadı veya sona erdi.`);
+             setMode('welcome');
+             setGameId('');
         }
       }
       setLoading(false);
@@ -164,7 +159,7 @@ const App = () => {
   
   // --- ADMIN/HOST Functions ---
 
-  // ADMIN: Yeni bir oyun oluşturur (Hardcoded soruları kullanır)
+  // ADMIN: Yeni bir oyun oluşturur
   const createGame = async (adminName) => {
     if (!isAuthReady || !db || !userId) {
       setError("Sistem hazır değil. Lütfen bekleyin.");
@@ -178,6 +173,7 @@ const App = () => {
 
     setLoading(true);
     setError('');
+    // Random 6 haneli ID oluştur
     const newGameId = Math.random().toString(36).substring(2, 8).toUpperCase();
     const newGameRef = getGameRef(newGameId);
     
@@ -206,9 +202,12 @@ const App = () => {
         playerAnswers: {}, 
         createdAt: new Date().toISOString(),
       });
+      
+      // Oyun başarıyla oluşturulduktan sonra state'i ayarla
       setGameId(newGameId);
       setUserName(adminName);
       setMode('admin');
+      
     } catch (e) {
       console.error("Create Game Error:", e);
       setError("Oyun oluşturulurken bir hata oluştu.");
@@ -231,12 +230,10 @@ const App = () => {
         });
     }
 
-    // Cevapları göstermek için bekleme süresi
     await new Promise(resolve => setTimeout(resolve, 3000)); 
 
     try {
       if (newIndex < game.questions.length) {
-        // Go to the next question
         await updateDoc(gameRef, {
           status: 'in-game',
           currentQuestionIndex: newIndex,
@@ -245,7 +242,6 @@ const App = () => {
           [`questions.${newIndex}.startTime`]: Date.now(), 
         });
       } else {
-        // End the game
         await updateDoc(gameRef, {
           status: 'score', 
           currentQuestionIndex: newIndex,
@@ -284,7 +280,6 @@ const App = () => {
 
   // PLAYER: Var olan oyuna katılır
   const joinGame = async (code, name) => {
-    // İsim kontrolü burada da tekrar ediyoruz.
     if (!isAuthReady || !db || !userId || !code || !name || name.length < 3) {
       setError("Sistem hatası: Lütfen kodu ve en az 3 karakterli kullanıcı adını girin.");
       return;
@@ -339,7 +334,7 @@ const App = () => {
     }
   };
   
-  // PLAYER: Cevabını gönderir (Hız tabanlı puanlama)
+  // PLAYER: Cevabını gönderir
   const submitAnswer = async (answerIndex) => {
     if (!game || game.status !== 'in-game' || game.answersReceived[userId]) return;
     const gameRef = getGameRef(gameId);
@@ -429,20 +424,6 @@ const App = () => {
     </button>
   );
   
-  // Giriş alanı bileşeni
-  const Input = ({ label, value, onChange, placeholder, type = 'text', readOnly = false }) => (
-    <div className="mb-4">
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        readOnly={readOnly}
-        className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-      />
-    </div>
-  );
   
   const QuizCreation = () => (
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-4xl text-center">
@@ -467,11 +448,16 @@ const App = () => {
           <p className="text-6xl font-black text-green-900 mt-2">{game.gameId}</p>
           {isAdmin && (
               <div className="mt-4">
-                  <Input 
-                    label="Paylaşılabilir Bağlantı (Kopyalayın)"
-                    value={gameLink}
-                    readOnly
-                  />
+                  {/* Kopyalanabilir Bağlantı Alanı */}
+                  <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Paylaşılabilir Bağlantı</label>
+                      <input
+                        type="text"
+                        value={gameLink}
+                        readOnly
+                        className="w-full p-3 border border-gray-300 bg-gray-100 rounded-lg shadow-sm"
+                      />
+                  </div>
                   <button
                     onClick={() => {
                         navigator.clipboard.writeText(gameLink).then(() => {
@@ -683,7 +669,7 @@ const App = () => {
                     'border-4 border-white ring-4 ring-black/20' : ''}
                 ${hasAnswered && playerAnswerInfo.answerIndex !== index ? 'opacity-50' : ''}
               `}
-              color="" // Varsayılan rengi özel renklerle geçersiz kıl
+              color="" 
             >
               {option}
             </Button>
@@ -753,59 +739,69 @@ const App = () => {
     );
   };
 
-  // YENİ Karşılama Ekranı (Basitleştirilmiş ve Minimum 3 Karakter Kontrollü)
-  const WelcomeScreen = () => {
-      
-    const handleEntry = async () => {
-        // İsim kontrolü: En az 3 karakter olmalı
-        if (!userName || userName.length < 3) {
-            setError("Lütfen en az 3 karakterli geçerli bir rumuz girin.");
-            return;
-        }
-
-        // Eğer URL'de bir gameId varsa, oyuncu katılmaya çalışıyor
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('gameId') || '';
-
-        if (code) {
-            // Oyuncu Katılma Akışı
-            await joinGame(code, userName);
-        } else {
-            // Admin (Yeni Oyun Oluşturma) Akışı
-            await createGame(userName);
-        }
-    };
-
-    const isJoining = new URLSearchParams(window.location.search).get('gameId');
-    const isButtonDisabled = !userName || userName.length < 3;
-
+  // KRİTİK DÜZELTME: WelcomeScreenComponent, Input odak kaybını önlemek için doğrudan HTML input kullanır.
+  const WelcomeScreenComponent = ({ userName, setUserName, handleEntry, isJoining, isButtonDisabled }) => {
     return (
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md text-center border-b-8 border-indigo-700">
         <h1 className="text-4xl font-black text-indigo-700 mb-2">Ramoot</h1>
         <p className="text-xl text-gray-600 mb-8 font-extrabold">TEMEL 13 GERRRRRRRRÇEK BİTİRME SINAVI</p>
 
-        <Input 
-          label="Adın nedir?"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value)}
-          placeholder="Rumuzunuz (Örn: Sadrazamın Keyfi)"
-        />
+        {/* INPUT ODAK KAYBI SORUNUNU ÇÖZMEK İÇİN DOĞRUDAN HTML INPUT KULLANIYORUZ */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Adın nedir?</label>
+          <input
+            type="text"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}
+            placeholder="Rumuzunuz (Örn: Sadrazamın Keyfi)"
+            className="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          />
+        </div>
         
         <div className="space-y-4 mt-6">
           <Button onClick={handleEntry} className="w-full" disabled={isButtonDisabled}>
-            {/* Buton metni dinamik: URL'de gameId varsa Katıl, yoksa Başlat */}
             {isJoining ? 'Oyuna Katıl' : 'Oyunu Başlat (Admin)'}
           </Button>
         </div>
-        
-        {/* Kullanıcının kafasını karıştıran userId'yi buradan kaldırdık */}
       </div>
     );
   };
   
+  // KRİTİK DÜZELTME: Bileşeni memo ile sarmalayarak gereksiz yeniden çizimleri önleriz.
+  const WelcomeScreen = React.memo(({ userName, setUserName, createGame, joinGame, setError }) => {
+    
+    const handleEntry = async () => {
+        if (!userName || userName.length < 3) {
+            setError("Lütfen en az 3 karakterli geçerli bir rumuz girin.");
+            return;
+        }
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('gameId') || '';
+
+        if (code) {
+            await joinGame(code, userName);
+        } else {
+            await createGame(userName);
+        }
+    };
+    
+    const isJoining = new URLSearchParams(window.location.search).get('gameId');
+    const isButtonDisabled = !userName || userName.length < 3;
+
+    return (
+        <WelcomeScreenComponent 
+            userName={userName}
+            setUserName={setUserName}
+            handleEntry={handleEntry}
+            isJoining={isJoining}
+            isButtonDisabled={isButtonDisabled}
+        />
+    );
+  });
+  
   // --- Ana Render Mantığı ---
   
-  // Yükleme Durumu
   if (!isAuthReady) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-indigo-800">
@@ -814,7 +810,6 @@ const App = () => {
     );
   }
   
-  // Hata Gösterimi
   if (error) {
     return (
         <div className="min-h-screen bg-indigo-800 flex flex-col items-center justify-center p-4">
@@ -831,8 +826,6 @@ const App = () => {
             }} color="bg-gray-500 hover:bg-gray-600">
                 Ana Sayfaya Dön
             </Button>
-            {/* Hatanın neyle ilgili olduğunu görmek isteyenler için, alt tarafa userId'yi bıraktık. */}
-            <p className="mt-6 text-xs text-gray-400">Hata Kodu/Kullanıcı ID: {userId}</p>
         </div>
     );
   }
@@ -860,16 +853,23 @@ const App = () => {
       Content = <Scoreboard />;
     }
   } else {
-    Content = <WelcomeScreen />;
+    // WelcomeScreen'i memo'lu ve prop'lu çağırıyoruz
+    Content = (
+        <WelcomeScreen 
+            userName={userName}
+            setUserName={setUserName}
+            createGame={createGame}
+            joinGame={joinGame}
+            setError={setError}
+        />
+    );
   }
 
   // Nihai düzen
   return (
     <div className="min-h-screen bg-indigo-800 flex flex-col items-center justify-center p-4 font-sans antialiased">
-      {/* Dinamik İçerik Alanı */}
       {Content}
       
-      {/* Geri Dön düğmesi (Oyun dışı ekranlar için) */}
       {(mode !== 'welcome' && !game) && (
         <div className="mt-8">
             <Button onClick={() => {
