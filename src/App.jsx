@@ -49,6 +49,7 @@ const QUESTIONS = [
   { id: 18, questionText: "Ramoot'un yapımcısı kimdir? (İpucu: Sizsiniz!)", options: ["Mark Zuckerberg", "İlkay (Siz)", "Elon Musk", "Gemini"], correctAnswerIndex: 1, imageUrl: "/images/18.jpg", points: 1000 },
 ];
 
+
 // Oyunun ana bileşeni
 const App = () => {
   const [db, setDb] = useState(null);
