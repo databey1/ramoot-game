@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Trophy, Users, Clock, Zap } from 'lucide-react';
+import { Trophy, Users, Clock, Zap, LogOut } from 'lucide-react';
 
 const QUESTIONS = [
-  { id: 1, questionText: "Ditching esnasında tüm sınıfı raft'e çekerken tüm gün ayak görüp yorgunluktan ve nefessizlikten inkapasite olan kimdir?", options: ["Cansu", "İlkay", "Aleyna", "Ezher"], correctAnswerIndex: 1, imageUrl: "/images/soru1-ankara.jpg", points: 1000 },
-  { id: 2, questionText: "Fındık anonsunu son dakika değişikliği ile anons kitabına ekleten kimdir?", options: ["Aylin", "Serkan", "Kübra", "Gürkan"], correctAnswerIndex: 3, imageUrl: "/images/soru2-everest.jpg", points: 1000 },
-  { id: 3, questionText: "Yolcu acil olarak işemeye çalışırken PDF'e göre karar veren kimdi?", options: ["Rana", "Fadime", "Ramazan", "Berke"], correctAnswerIndex: 2, imageUrl: "/images/soru3-react.jpg", points: 1000 },
-  { id: 4, questionText: "Arnavutköy isimli zehirli oku İLK sıkan kimdir?", options: ["Fadime", "Zeynep", "Kübra", "Mert"], correctAnswerIndex: 2, imageUrl: "/images/soru4-space.jpg", points: 1000 },
-  { id: 5, questionText: "Ev kiralarıyla oto galeri açmaya yemin etmiş ekip arkadaşımız kimdir?", options: ["Hatice", "Hatice Kübra", "Özlem", "Mert"], correctAnswerIndex: 3, imageUrl: "/images/soru5-gold.jpg", points: 1000 },
-  { id: 6, questionText: "Allahın hakkı üçtür diyip her sınava 3 kere kim girmişti?", options: ["Aylin", "Rana", "Aleyna", "Oğuzhan"], correctAnswerIndex: 0, imageUrl: "/images/soru6-vercel.jpg", points: 1000 },
-  { id: 7, questionText: "Yangın tiplerine yeni bir soluk getirerek 'alpha türü' yangını jargona sokan kimdi?", options: ["Ezher", "Fadime", "Özlem", "Gürkan"], correctAnswerIndex: 0, imageUrl: "/images/soru7-turkey.jpg", points: 1000 },
-  { id: 8, questionText: "Sınıfımızın Ankaralı zengin ismi kimdir?", options: ["İlkay", "Rana", "Gürkan", "Ezher"], correctAnswerIndex: 1, imageUrl: "/images/soru8-byte.jpg", points: 1000 },
-  { id: 9, questionText: "Üniversiteyi 4.sınıfta dondurduğuna şerefi ve namusu üzerine yemin eden arkadaşımız kimdir?", options: ["Özlem", "Zeynep", "Berke", "Ramazan"], correctAnswerIndex: 0, imageUrl: "/images/soru9-monalisa.jpg", points: 1000 },
-  { id: 10, questionText: "Bu testi çözerken bile duygulanıp ağlama ihtimali olan kimdir?", options: ["Kübra", "Hatice Kübra", "Hatice", "Aleyna"], correctAnswerIndex: 3, imageUrl: "/images/soru10-ocean.jpg", points: 1000 },
-  { id: 11, questionText: "Bizi manitadan ayrı düşünmeyip sabahları gruba güno aşkım mesajı atan kimdir?", options: ["Mert", "Oğuz", "Berke", "Gürkan"], correctAnswerIndex: 2, imageUrl: "/images/soru11-jupiter.jpg", points: 1000 },
-  { id: 12, questionText: "Japonya'da anime festivallerinde edindiği CRM becerileriyle derste halka problemini tekte çözen kimdir?", options: ["Ramazan", "Kübra", "Berke", "Cansu"], correctAnswerIndex: 3, imageUrl: "/images/soru12-area.jpg", points: 1000 },
-  { id: 13, questionText: "İş çıkışı piercing ve sayısız küpeyle hardcore death metalci takılan arkadaşımız kimdir", options: ["Rana", "Fadime", "Zeynep", "Aylin"], correctAnswerIndex: 2, imageUrl: "/images/soru13-skin.jpg", points: 1000 },
-  { id: 14, questionText: "Görme engelli yolcuya bağırarak dudaklarımı görebiliyor musun diyen kimdir?", options: ["İlkay", "Serkan", "Oğuz", "Mert"], correctAnswerIndex: 2, imageUrl: "/images/soru14-hobbit.jpg", points: 1000 },
-  { id: 15, questionText: "Apronda babadan yadigar doblosuyla sıfır çizmek isteyen kimdir?", options: ["Hatice Kübra", "Ramazan", "Gürkan", "Hatice"], correctAnswerIndex: 3, imageUrl: "/images/soru15-triangle.jpg", points: 1000 },
-  { id: 16, questionText: "Ders çalışma bahanesiyle tüm sınıfı sürekli Gloria Jeanse götürüp şubeden kar payı alan kimdir?", options: ["Aleyna", "Fadime", "Ezher", "Rana"], correctAnswerIndex: 1, imageUrl: "/images/soru16-firebase.jpg", points: 1000 },
-  { id: 17, questionText: "Rusyanın eşsiz bucaksız tundralarından, Ciddenin kavurucu sıcaklarına kadar tüm coğrafya bilgisini bize aktaran kişi kimdir?", options: ["Hatice Kübra", "Gürkan", "Ezher", "İlkay"], correctAnswerIndex: 0, imageUrl: "/images/soru17-colors.jpg", points: 1000 },
-  { id: 18, questionText: "Uğur Dündar gibi araştırmacı gazeteci, Picasso gibi soyut bir ressam ve İngiltere Kralı gibi İngilicce bilen kimdir?", options: ["Zeynep", "Cansu", "Serkan", "Oğuz"], correctAnswerIndex: 2, imageUrl: "/images/soru18-maker.jpg", points: 1000 },
+  { id: 1, questionText: "Ditching esnasında tüm sınıfı raft'e çekerken tüm gün ayak görüp yorgunluktan ve nefessizlikten inkapasite olan kimdir?", options: ["Cansu", "İlkay", "Aleyna", "Ezher"], correctAnswerIndex: 1, points: 1000 },
+  { id: 2, questionText: "Fındık anonsunu son dakika değişikliği ile anons kitabına ekleten kimdir?", options: ["Aylin", "Serkan", "Kübra", "Gürkan"], correctAnswerIndex: 3, points: 1000 },
+  { id: 3, questionText: "Yolcu acil olarak işemeye çalışırken PDF'e göre karar veren kimdi?", options: ["Rana", "Fadime", "Ramazan", "Berke"], correctAnswerIndex: 2, points: 1000 },
+  { id: 4, questionText: "Arnavutköy isimli zehirli oku İLK sıkan kimdir?", options: ["Fadime", "Zeynep", "Kübra", "Mert"], correctAnswerIndex: 2, points: 1000 },
+  { id: 5, questionText: "Ev kiralarıyla oto galeri açmaya yemin etmiş ekip arkadaşımız kimdir?", options: ["Hatice", "Hatice Kübra", "Özlem", "Mert"], correctAnswerIndex: 3, points: 1000 },
+  { id: 6, questionText: "Allahın hakkı üçtür diyip her sınava 3 kere kim girmişti?", options: ["Aylin", "Rana", "Aleyna", "Oğuzhan"], correctAnswerIndex: 0, points: 1000 },
+  { id: 7, questionText: "Yangın tiplerine yeni bir soluk getirerek 'alpha türü' yangını jargona sokan kimdi?", options: ["Ezher", "Fadime", "Özlem", "Gürkan"], correctAnswerIndex: 0, points: 1000 },
+  { id: 8, questionText: "Sınıfımızın Ankaralı zengin ismi kimdir?", options: ["İlkay", "Rana", "Gürkan", "Ezher"], correctAnswerIndex: 1, points: 1000 },
+  { id: 9, questionText: "Üniversiteyi 4.sınıfta dondurduğuna şerefi ve namusu üzerine yemin eden arkadaşımız kimdir?", options: ["Özlem", "Zeynep", "Berke", "Ramazan"], correctAnswerIndex: 0, points: 1000 },
+  { id: 10, questionText: "Bu testi çözerken bile duygulanıp ağlama ihtimali olan kimdir?", options: ["Kübra", "Hatice Kübra", "Hatice", "Aleyna"], correctAnswerIndex: 3, points: 1000 },
+  { id: 11, questionText: "Bizi manitadan ayrı düşünmeyip sabahları gruba güno aşkım mesajı atan kimdir?", options: ["Mert", "Oğuz", "Berke", "Gürkan"], correctAnswerIndex: 2, points: 1000 },
+  { id: 12, questionText: "Japonya'da anime festivallerinde edindiği CRM becerileriyle derste halka problemini tekte çözen kimdir?", options: ["Ramazan", "Kübra", "Berke", "Cansu"], correctAnswerIndex: 3, points: 1000 },
+  { id: 13, questionText: "İş çıkışı piercing ve sayısız küpeyle hardcore death metalci takılan arkadaşımız kimdir", options: ["Rana", "Fadime", "Zeynep", "Aylin"], correctAnswerIndex: 2, points: 1000 },
+  { id: 14, questionText: "Görme engelli yolcuya bağırarak dudaklarımı görebiliyor musun diyen kimdir?", options: ["İlkay", "Serkan", "Oğuz", "Mert"], correctAnswerIndex: 2, points: 1000 },
+  { id: 15, questionText: "Apronda babadan yadigar doblosuyla sıfır çizmek isteyen kimdir?", options: ["Hatice Kübra", "Ramazan", "Gürkan", "Hatice"], correctAnswerIndex: 3, points: 1000 },
+  { id: 16, questionText: "Ders çalışma bahanesiyle tüm sınıfı sürekli Gloria Jeanse götürüp şubeden kar payı alan kimdir?", options: ["Aleyna", "Fadime", "Ezher", "Rana"], correctAnswerIndex: 1, points: 1000 },
+  { id: 17, questionText: "Rusyanın eşsiz bucaksız tundralarından, Ciddenin kavurucu sıcaklarına kadar tüm coğrafya bilgisini bize aktaran kişi kimdir?", options: ["Hatice Kübra", "Gürkan", "Ezher", "İlkay"], correctAnswerIndex: 0, points: 1000 },
+  { id: 18, questionText: "Uğur Dündar gibi araştırmacı gazeteci, Picasso gibi soyut bir ressam ve İngiltere Kralı gibi İngilicce bilen kimdir?", options: ["Zeynep", "Cansu", "Serkan", "Oğuz"], correctAnswerIndex: 2, points: 1000 },
 ];
 
 const OPTION_COLORS = [
@@ -30,22 +30,64 @@ const OPTION_COLORS = [
 ];
 
 export default function KahootQuiz() {
-  const [gameState, setGameState] = useState('start'); // start, playing, result, leaderboard
+  const [gameState, setGameState] = useState('login'); // login, start, playing, result, leaderboard
+  const [userName, setUserName] = useState('');
+  const [userNameInput, setUserNameInput] = useState('');
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [answers, setAnswers] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
+
+  // Leaderboard'u yükle
+  useEffect(() => {
+    loadLeaderboard();
+  }, []);
+
+  const loadLeaderboard = async () => {
+    try {
+      const data = await window.storage.get('leaderboard-scores', true);
+      if (data) {
+        setLeaderboard(JSON.parse(data.value));
+      }
+    } catch (e) {
+      console.log('Leaderboard yüklenemedi');
+    }
+  };
+
+  const saveToLeaderboard = async (finalScore) => {
+    try {
+      const currentBoard = leaderboard || [];
+      const newEntry = {
+        name: userName,
+        score: finalScore,
+        date: new Date().toLocaleString('tr-TR'),
+      };
+      const updatedBoard = [...currentBoard, newEntry].sort((a, b) => b.score - a.score);
+      await window.storage.set('leaderboard-scores', JSON.stringify(updatedBoard), true);
+      setLeaderboard(updatedBoard);
+    } catch (e) {
+      console.log('Leaderboard kaydedilemedi');
+    }
+  };
 
   useEffect(() => {
     if (gameState === 'playing' && !showResult && timeLeft > 0) {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
-    } else if (timeLeft === 0 && !showResult) {
+    } else if (timeLeft === 0 && !showResult && gameState === 'playing') {
       handleAnswer(null);
     }
   }, [timeLeft, gameState, showResult]);
+
+  const handleLogin = () => {
+    if (userNameInput.trim().length > 0) {
+      setUserName(userNameInput);
+      setGameState('start');
+    }
+  };
 
   const startGame = () => {
     setGameState('playing');
@@ -87,19 +129,73 @@ export default function KahootQuiz() {
       setShowResult(false);
       setTimeLeft(20);
     } else {
-      setGameState('leaderboard');
+      saveToLeaderboard(score);
+      setGameState('result');
     }
   };
 
-  if (gameState === 'start') {
+  const logout = () => {
+    setUserName('');
+    setUserNameInput('');
+    setGameState('login');
+    loadLeaderboard();
+  };
+
+  // LOGIN SCREEN
+  if (gameState === 'login') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 flex items-center justify-center p-4">
-        <div className="text-center space-y-8 animate-fadeIn">
+        <div className="text-center space-y-8 max-w-md w-full">
           <div className="space-y-4">
             <h1 className="text-7xl font-black text-white drop-shadow-2xl tracking-tight">
               KAHOOT!
             </h1>
             <p className="text-2xl text-white/90 font-semibold">Arkadaş Trivia Zamanı 🎉</p>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <input
+                type="text"
+                placeholder="Adını gir..."
+                value={userNameInput}
+                onChange={(e) => setUserNameInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                className="w-full px-6 py-4 rounded-full text-2xl font-bold text-center border-4 border-white/50 bg-white/20 backdrop-blur-md text-white placeholder-white/50 focus:outline-none focus:border-white"
+              />
+            </div>
+            <button
+              onClick={handleLogin}
+              className="w-full bg-white text-purple-600 px-8 py-4 rounded-full text-2xl font-black hover:scale-105 transition-transform shadow-2xl hover:shadow-purple-500/50"
+            >
+              Devam Et →
+            </button>
+          </div>
+
+          <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 border-4 border-white/30">
+            <p className="text-white font-bold mb-3">🏆 TOP 5 OYUNCU</p>
+            <div className="space-y-2">
+              {leaderboard.slice(0, 5).map((entry, idx) => (
+                <div key={idx} className="flex justify-between items-center text-white">
+                  <span className="font-bold">{idx + 1}. {entry.name}</span>
+                  <span className="text-yellow-300 font-black">{entry.score}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // START SCREEN
+  if (gameState === 'start') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-500 to-orange-500 flex items-center justify-center p-4">
+        <div className="text-center space-y-8 animate-fadeIn">
+          <div className="space-y-2">
+            <p className="text-white text-2xl">Hoşgeldin!</p>
+            <h1 className="text-5xl font-black text-white drop-shadow-2xl">{userName}</h1>
           </div>
           
           <div className="bg-white/20 backdrop-blur-md rounded-3xl p-8 space-y-4 border-4 border-white/30">
@@ -128,6 +224,7 @@ export default function KahootQuiz() {
     );
   }
 
+  // PLAYING SCREEN
   if (gameState === 'playing') {
     const question = QUESTIONS[currentQuestion];
     
@@ -137,7 +234,8 @@ export default function KahootQuiz() {
           {/* Header */}
           <div className="bg-white/20 backdrop-blur-md rounded-2xl p-4 mb-6 flex justify-between items-center border-2 border-white/30">
             <div className="text-white">
-              <span className="text-lg font-bold">Soru {currentQuestion + 1}/{QUESTIONS.length}</span>
+              <span className="text-lg font-bold">{userName}</span>
+              <p className="text-sm">Soru {currentQuestion + 1}/{QUESTIONS.length}</p>
             </div>
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2 bg-white/30 px-4 py-2 rounded-full">
@@ -160,7 +258,7 @@ export default function KahootQuiz() {
             </h2>
           </div>
 
-          {/* Options or Image */}
+          {/* Options */}
           {!showResult ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {question.options.map((option, index) => {
@@ -180,7 +278,7 @@ export default function KahootQuiz() {
           ) : (
             <div className="space-y-6">
               {/* Result Message */}
-              <div className={`${selectedAnswer === question.correctAnswerIndex ? 'bg-green-500' : 'bg-red-500'} text-white rounded-2xl p-6 text-center animate-fadeIn`}>
+              <div className={`${selectedAnswer === question.correctAnswerIndex ? 'bg-green-500' : 'bg-red-500'} text-white rounded-2xl p-6 text-center animate-pulse`}>
                 <p className="text-3xl font-black mb-2">
                   {selectedAnswer === question.correctAnswerIndex ? '🎉 DOĞRU!' : '❌ YANLIŞ!'}
                 </p>
@@ -193,28 +291,12 @@ export default function KahootQuiz() {
                   </p>
                 )}
               </div>
-
-              {/* Image */}
-              <div className="bg-white rounded-2xl p-4 shadow-2xl">
-                <img 
-                  src={question.imageUrl} 
-                  alt={`Soru ${question.id}`}
-                  className="w-full h-auto rounded-xl"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'flex';
-                  }}
-                />
-                <div className="hidden items-center justify-center h-64 bg-gray-100 rounded-xl">
-                  <p className="text-gray-500 text-lg">Fotoğraf yükleniyor...</p>
-                </div>
-              </div>
             </div>
           )}
 
           {/* Next Button */}
           {showResult && (
-            <div className="mt-6 text-center animate-fadeIn">
+            <div className="mt-6 text-center animate-pulse">
               <button
                 onClick={nextQuestion}
                 className="bg-white text-purple-600 px-12 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl"
@@ -228,7 +310,8 @@ export default function KahootQuiz() {
     );
   }
 
-  if (gameState === 'leaderboard') {
+  // RESULT SCREEN
+  if (gameState === 'result') {
     const percentage = Math.round((answers.filter(a => a.isCorrect).length / QUESTIONS.length) * 100);
     
     return (
@@ -236,7 +319,7 @@ export default function KahootQuiz() {
         <div className="max-w-2xl w-full space-y-8">
           <div className="text-center space-y-4">
             <Trophy className="mx-auto text-yellow-300" size={80} />
-            <h1 className="text-6xl font-black text-white drop-shadow-2xl">Tebrikler!</h1>
+            <h1 className="text-6xl font-black text-white drop-shadow-2xl">Tebrikler {userName}!</h1>
             <p className="text-3xl text-white/90 font-bold">Oyun Bitti</p>
           </div>
 
@@ -270,12 +353,78 @@ export default function KahootQuiz() {
             </div>
           </div>
 
-          <div className="text-center">
+          <div className="space-y-3">
+            <button
+              onClick={() => setGameState('leaderboard')}
+              className="w-full bg-white text-blue-600 px-12 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl"
+            >
+              Leaderboard'u Gör 🏆
+            </button>
             <button
               onClick={startGame}
-              className="bg-white text-purple-600 px-12 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl"
+              className="w-full bg-yellow-400 text-blue-600 px-12 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl"
             >
               Tekrar Oyna 🔄
+            </button>
+            <button
+              onClick={logout}
+              className="w-full bg-red-500 text-white px-12 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl flex items-center justify-center gap-2"
+            >
+              <LogOut size={24} /> Çıkış Yap
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // LEADERBOARD SCREEN
+  if (gameState === 'leaderboard') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center p-4">
+        <div className="max-w-3xl w-full space-y-8">
+          <div className="text-center space-y-4">
+            <Trophy className="mx-auto text-white" size={80} />
+            <h1 className="text-6xl font-black text-white drop-shadow-2xl">LEADERBOARD</h1>
+            <p className="text-2xl text-white/90 font-bold">En İyi 10 Oyuncu</p>
+          </div>
+
+          <div className="bg-white/20 backdrop-blur-md rounded-3xl p-6 border-4 border-white/30 space-y-3 max-h-96 overflow-y-auto">
+            {leaderboard.length === 0 ? (
+              <p className="text-white text-center text-xl font-bold">Henüz kimse oyun oynamadı!</p>
+            ) : (
+              leaderboard.slice(0, 10).map((entry, idx) => (
+                <div
+                  key={idx}
+                  className={`flex justify-between items-center p-4 rounded-2xl font-bold text-xl ${
+                    idx === 0 ? 'bg-yellow-300 text-gray-800' :
+                    idx === 1 ? 'bg-gray-300 text-gray-800' :
+                    idx === 2 ? 'bg-orange-300 text-gray-800' :
+                    'bg-white/20 text-white'
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    <span className="text-2xl">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`}</span>
+                    <span>{entry.name}</span>
+                  </span>
+                  <span>{entry.score}</span>
+                </div>
+              ))
+            )}
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={() => setGameState('result')}
+              className="flex-1 bg-white text-orange-600 px-8 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl"
+            >
+              Geri Dön ←
+            </button>
+            <button
+              onClick={logout}
+              className="flex-1 bg-red-600 text-white px-8 py-4 rounded-full text-2xl font-black hover:scale-110 transition-transform shadow-2xl flex items-center justify-center gap-2"
+            >
+              <LogOut size={24} /> Çıkış
             </button>
           </div>
         </div>
